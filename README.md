@@ -13,15 +13,18 @@ Ossian to point it at — see [its README](https://github.com/dockndevai/ossian)
 
 ## What it gives an agent
 
-| Tool | For |
-|---|---|
-| `ask_documents` | answer from the corpus, with citations — and say so when it cannot |
-| `list_namespaces` | which slices exist, and how much is in each |
-| `list_documents` | what is available to answer from, and what is still ingesting |
-| `add_document_from_url` | pull a public page into the corpus |
-| `remember` | record a preference, fact or decision worth keeping |
-| `recall` | retrieve what is relevant now, ranked by relevance, importance and recency |
-| `forget_session` | erase one conversation's memory |
+Tools are gated by access mode (see [Safe by default](#safe-by-default)) — the server starts
+read-only, exposing only the four read tools until you raise the mode.
+
+| Tool | For | Needs mode |
+|---|---|---|
+| `ask_documents` | answer from the corpus, with citations — and say so when it cannot | read-only |
+| `list_namespaces` | which slices exist, and how much is in each | read-only |
+| `list_documents` | what is available to answer from, and what is still ingesting | read-only |
+| `recall` | retrieve what is relevant now, ranked by relevance, importance and recency | read-only |
+| `add_document_from_url` | pull a public page into the corpus | read-write |
+| `remember` | record a preference, fact or decision worth keeping | read-write |
+| `forget_session` | erase one conversation's memory (irreversible) | admin + `OSSIAN_ALLOW_FORGET` |
 
 ## Install
 
@@ -50,7 +53,8 @@ leaks reads only what that agent was for.
       "env": {
         "OSSIAN_URL": "http://localhost:8081",
         "OSSIAN_API_KEY": "osk_...",
-        "OSSIAN_AGENT_ID": "support-bot"
+        "OSSIAN_AGENT_ID": "support-bot",
+        "OSSIAN_MODE": "read-only"
       }
     }
   }
@@ -59,6 +63,28 @@ leaks reads only what that agent was for.
 
 `OSSIAN_AGENT_ID` separates one agent's memories from another's; two agents sharing an id share
 their recollections, which is occasionally what you want and usually not.
+
+See [docs/CLIENTS.md](docs/CLIENTS.md) for Claude Code / Cursor / Codex / VS Code / Windsurf
+snippets, and [.env.example](.env.example) for every supported variable.
+
+## Safe by default
+
+The server enforces an access model on top of the Ossian API key — defence in depth over the
+key's own roles and namespace confinement. It reads its policy from the environment
+([.env.example](.env.example)) and enforces it in [`src/security.ts`](src/security.ts):
+
+- **`OSSIAN_MODE`** — `read-only` (default) → `read-write` → `admin`. A tool is registered only if
+  the mode allows its capability. Read-only exposes four tools; ingest and remember need
+  `read-write`; forget needs `admin`.
+- **`OSSIAN_ALLOW_FORGET`** — `forget_session` erases memory irreversibly, so on top of `admin`
+  mode it also requires this flag.
+- **`OSSIAN_NAMESPACE_ALLOWLIST` / `OSSIAN_PROTECTED_NAMESPACES`** — confine which slices can be
+  touched, and mark slices that may be read but never ingested into.
+- **`OSSIAN_DRY_RUN`** — validate and log writes (ingest / remember / forget) without executing.
+- **`OSSIAN_AUDIT_LOG`** — a JSON audit line per guarded operation, on stderr (default on).
+
+The primary control remains the API key: issue the narrowest one that works. See
+[SECURITY.md](SECURITY.md).
 
 ## Two things worth knowing
 

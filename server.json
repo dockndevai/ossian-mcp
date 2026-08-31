@@ -1,20 +1,47 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.dockndevai/ossian-mcp",
-  "description": "Ask your organisation's own documents and get answers with the passages they came from, plus durable memory for agents.",
+  "description": "Ask your organisation's own documents and get answers with the passages they came from, plus durable memory for agents — safe-by-default access modes.",
   "repository": {
     "url": "https://github.com/dockndevai/ossian-mcp",
     "source": "github"
   },
-  "version": "0.1.0",
+  "version": "0.1.1",
   "packages": [
     {
       "registryType": "npm",
+      "registryBaseUrl": "https://registry.npmjs.org",
       "identifier": "ossian-mcp",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "transport": {
         "type": "stdio"
-      }
+      },
+      "environmentVariables": [
+        {
+          "name": "OSSIAN_URL",
+          "description": "Base URL of the Ossian installation (e.g. http://localhost:8081).",
+          "isRequired": false,
+          "isSecret": false
+        },
+        {
+          "name": "OSSIAN_API_KEY",
+          "description": "Ossian API key (osk_…). Scope it to the narrowest role/namespace that works.",
+          "isRequired": true,
+          "isSecret": true
+        },
+        {
+          "name": "OSSIAN_AGENT_ID",
+          "description": "Separates one agent's memories from another's. Defaults to 'mcp'.",
+          "isRequired": false,
+          "isSecret": false
+        },
+        {
+          "name": "OSSIAN_MODE",
+          "description": "Access mode: read-only | read-write | admin. Starts read-only; writes need read-write.",
+          "isRequired": false,
+          "isSecret": false
+        }
+      ]
     }
   ]
 }

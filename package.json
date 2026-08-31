@@ -1,7 +1,8 @@
 {
   "name": "ossian-mcp",
-  "version": "0.1.0",
-  "description": "MCP server for Ossian \u2014 ask your own documents with citations, and give an agent memory that persists",
+  "mcpName": "io.github.dockndevai/ossian-mcp",
+  "version": "0.1.1",
+  "description": "MCP server for Ossian — ask your own documents with citations, and give an agent memory that persists, with safe-by-default access modes.",
   "license": "Apache-2.0",
   "type": "module",
   "bin": {
@@ -11,36 +12,47 @@
     "dist",
     "README.md"
   ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "prepublishOnly": "npm run build",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "tsc -p tsconfig.json --noEmit"
+  },
   "keywords": [
     "mcp",
+    "model-context-protocol",
     "modelcontextprotocol",
     "rag",
     "retrieval",
     "memory",
-    "ossian"
+    "citations",
+    "ossian",
+    "llm",
+    "ai"
   ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/dockndevai/ossian-mcp.git"
   },
-  "homepage": "https://github.com/dockndevai/ossian-mcp",
-  "engines": {
-    "node": ">=18"
-  },
-  "scripts": {
-    "build": "tsc",
-    "prepublishOnly": "npm run build"
+  "homepage": "https://github.com/dockndevai/ossian-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/dockndevai/ossian-mcp/issues"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.0.0",
+    "@modelcontextprotocol/sdk": "^1.30.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@types/node": "^22.0.0",
-    "typescript": "^5.6.0"
-  },
-  "mcpName": "io.github.dockndevai/ossian-mcp",
-  "bugs": {
-    "url": "https://github.com/dockndevai/ossian-mcp/issues"
+    "@types/node": "^22.9.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
+    "vitest": "^3.2.7"
   }
 }

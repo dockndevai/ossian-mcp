@@ -1,0 +1,89 @@
+name: Release
+
+# Publishes the package on a version tag, or on a manual run from the Actions tab.
+#
+# Tag release:
+#   npm version patch            # bumps package.json + creates the vX.Y.Z tag
+#   # bump "version" in server.json to match
+#   git push --follow-tags
+#
+# Manual run (Actions tab → Release → Run workflow):
+#   dry_run = true  → build + validate, npm publish --dry-run (nothing published)
+#   dry_run = false → real publish of the current package.json version
+#
+# The tag (vX.Y.Z), package.json, and server.json versions must all agree.
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run — build and validate but do NOT publish"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write # create the GitHub Release
+  id-token: write # npm provenance + (optional) MCP registry OIDC
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: "https://registry.npmjs.org"
+          cache: npm
+
+      - run: npm ci
+
+      - name: Resolve and verify version
+        run: |
+          PKG="$(node -p "require('./package.json').version")"
+          SRV="$(node -p "require('./server.json').version")"
+          echo "package.json=$PKG  server.json=$SRV  ref=$GITHUB_REF_NAME ($GITHUB_REF_TYPE)"
+          if [ "$PKG" != "$SRV" ]; then echo "::error::package.json ($PKG) and server.json ($SRV) versions differ"; exit 1; fi
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then
+            TAG="${GITHUB_REF_NAME#v}"
+            if [ "$TAG" != "$PKG" ]; then echo "::error::tag v$TAG does not match version $PKG"; exit 1; fi
+          fi
+
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+      - name: Security audit (fail on high/critical)
+        run: npm audit --audit-level=high
+
+      - name: Publish to npm
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.dry_run }}" = "true" ]; then
+            echo "Dry run — validating the package without publishing."
+            npm publish --dry-run --access public
+          else
+            npm publish --provenance --access public
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create GitHub Release
+        if: github.ref_type == 'tag'
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+
+      # Optional: publish to the official MCP Registry (registry.modelcontextprotocol.io).
+      # Enable by setting the repo variable PUBLISH_TO_MCP_REGISTRY=true. Uses passwordless
+      # GitHub OIDC for the io.github.<owner> namespace — no secret required. Confirm the
+      # current install command at https://modelcontextprotocol.io/registry.
+      - name: Publish to MCP Registry
+        if: vars.PUBLISH_TO_MCP_REGISTRY == 'true' && !(github.event_name == 'workflow_dispatch' && inputs.dry_run)
+        run: |
+          curl -sSL "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_linux_amd64.tar.gz" | tar -xz mcp-publisher
+          ./mcp-publisher login github-oidc
+          ./mcp-publisher publish
