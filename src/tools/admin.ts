@@ -21,10 +21,12 @@ export const adminTools: ToolDef[] = [
         agentId: z.string().optional(),
       },
     },
-    handler: async (args, { client, policy, defaultAgentId }) => {
+    handler: async (args, { client, policy, defaultAgentId, confirm }) => {
       const { dryRun } = policy.guard({ tool: "forget_session", capability: "admin", destructive: true });
       const sessionId = args.sessionId as string;
       if (dryRun) return textResult(`[dry-run] Would forget all memories for session '${sessionId}'.`);
+      const ok = await confirm.confirm({ action: "forget session (erase its memories)", target: sessionId });
+      if (!ok.approved) return textResult(`Cancelled — ${ok.reason}.`);
       const r = await client.forgetSession((args.agentId as string | undefined) ?? defaultAgentId, sessionId);
       return textResult(`Forgot ${r.forgotten} ${r.forgotten === 1 ? "memory" : "memories"} from that session.`);
     },

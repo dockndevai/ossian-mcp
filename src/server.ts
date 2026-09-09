@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { AppConfig } from "./config.js";
 import { OssianClient, OssianError } from "./ossian/client.js";
+import { makeConfirmer } from "./elicit.js";
 import { PolicyError, SecurityPolicy } from "./security.js";
 import { adminTools } from "./tools/admin.js";
 import { annotationsFor } from "./tools/annotations.js";
@@ -13,9 +14,8 @@ export const ALL_TOOLS: ToolDef[] = [...readTools, ...writeTools, ...adminTools]
 export function buildServer(config: AppConfig): { server: McpServer; enabled: string[] } {
   const policy = new SecurityPolicy(config.security);
   const client = new OssianClient(config.connection.baseUrl, config.connection.apiKey, config.connection.timeoutMs);
-  const ctx: ToolContext = { client, policy, defaultAgentId: config.defaultAgentId };
-
-  const server = new McpServer({ name: "ossian", version: "0.1.2" });
+  const server = new McpServer({ name: "ossian", version: "0.2.0" });
+  const ctx: ToolContext = { client, policy, defaultAgentId: config.defaultAgentId, confirm: makeConfirmer(server) };
 
   const enabled: string[] = [];
   for (const tool of ALL_TOOLS) {
