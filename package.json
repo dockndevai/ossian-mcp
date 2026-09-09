@@ -1,7 +1,7 @@
 {
   "name": "ossian-mcp",
   "mcpName": "io.github.dockndevai/ossian-mcp",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "MCP server for Ossian — ask your own documents with citations, and give an agent memory that persists, with safe-by-default access modes.",
   "license": "Apache-2.0",
   "type": "module",
@@ -53,6 +53,6 @@
     "@types/node": "^22.9.0",
     "tsx": "^4.19.2",
     "typescript": "^5.6.3",
-    "vitest": "^3.2.7"
+    "vitest": "^5.0.0"
   }
 }
