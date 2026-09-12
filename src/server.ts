@@ -14,7 +14,7 @@ export const ALL_TOOLS: ToolDef[] = [...readTools, ...writeTools, ...adminTools]
 export function buildServer(config: AppConfig): { server: McpServer; enabled: string[] } {
   const policy = new SecurityPolicy(config.security);
   const client = new OssianClient(config.connection.baseUrl, config.connection.apiKey, config.connection.timeoutMs);
-  const server = new McpServer({ name: "ossian", version: "0.2.1" });
+  const server = new McpServer({ name: "ossian", version: "0.2.2" });
   const ctx: ToolContext = { client, policy, defaultAgentId: config.defaultAgentId, confirm: makeConfirmer(server) };
 
   const enabled: string[] = [];
