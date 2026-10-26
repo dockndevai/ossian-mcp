@@ -4,6 +4,17 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.5] - 2026-10-26
+
+### Security
+- Bump transitive `body-parser` and `fast-uri` (via `npm audit fix`) to clear
+  1 high (`body-parser` DoS via trailing bytes after a compressed request
+  body) and 1 moderate (`fast-uri` URI scheme/host confusion, 4 advisories)
+  vulnerability. `npm audit` reports 0 vulnerabilities.
+
+### Changed
+- Patch bump `@modelcontextprotocol/sdk` (1.32.1 → 1.32.2), in-range.
+
 ## [0.2.4] - 2026-10-19
 
 ### Changed
