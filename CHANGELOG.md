@@ -4,6 +4,11 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.6] - 2026-11-02
+
+### Changed
+- Routine dependency maintenance: `npm audit --audit-level=high` reported 0 high/critical advisories. `npm audit fix` cleared a moderate `@hono/node-server` advisory (`serveStatic` double path-decoding, GHSA-rmxm-3fg6-px4f, 2.1.1 → 2.1.5, transitive via `@modelcontextprotocol/sdk`); `npm audit` now reports 0 vulnerabilities. Took an in-range patch bump for `@types/node` (26.6.5 → 26.6.6). No feature or behavior changes.
+
 ## [0.2.5] - 2026-10-26
 
 ### Security
