@@ -14,8 +14,13 @@ export const ALL_TOOLS: ToolDef[] = [...readTools, ...writeTools, ...adminTools]
 export function buildServer(config: AppConfig): { server: McpServer; enabled: string[] } {
   const policy = new SecurityPolicy(config.security);
   const client = new OssianClient(config.connection.baseUrl, config.connection.apiKey, config.connection.timeoutMs);
-  const server = new McpServer({ name: "ossian", version: "0.2.7" });
-  const ctx: ToolContext = { client, policy, defaultAgentId: config.defaultAgentId, confirm: makeConfirmer(server) };
+  const server = new McpServer({ name: "ossian", version: "0.3.0" });
+  const confirmer = makeConfirmer(server, {
+    name: "ossian-mcp",
+    requireHuman: config.security.requireHumanApproval,
+    audit: config.security.auditLog,
+  });
+  const ctx: ToolContext = { client, policy, defaultAgentId: config.defaultAgentId, confirm: confirmer };
 
   const enabled: string[] = [];
   for (const tool of ALL_TOOLS) {
@@ -27,7 +32,8 @@ export function buildServer(config: AppConfig): { server: McpServer; enabled: st
       { ...tool.config, annotations: annotationsFor(tool) },
       async (args: Record<string, unknown>) => {
         try {
-          return await tool.handler(args ?? {}, ctx);
+          // Every approval prompt in this call is bound to this tool + these exact arguments.
+          return await tool.handler(args ?? {}, { ...ctx, confirm: confirmer.forCall(tool.name, args ?? {}) });
         } catch (err) {
           return toErrorResult(err);
         }

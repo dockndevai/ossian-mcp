@@ -23,6 +23,13 @@ automation and grant it the least access it needs.
 - **Gate irreversible forget.** `forget_session` erases a conversation's memory
   and cannot be undone. It requires both `admin` mode and
   `OSSIAN_ALLOW_FORGET=true`.
+- **Require a human for the irreversible erase.** Set `OSSIAN_REQUIRE_HUMAN_APPROVAL=true` so
+  `forget_session` is refused when the client cannot show an approval prompt. Each approval is
+  bound to the exact tool and arguments (fingerprint) and to the session's set of memories (the
+  memory ids and a hash of each one's content, read through Ossian's list endpoint); if memories
+  were added, removed or changed while the human was deciding, the action is refused. A prompt
+  nobody answers within 5 minutes is a refusal. Approval receipts are written to the audit log
+  (`"audit":"approval"`, with `approvedBy` = `human` or `flag-only`).
 - **Preview with dry-run.** `OSSIAN_DRY_RUN=true` validates and logs write intent
   (ingest / remember / forget) without executing it.
 - **Memory is not the corpus.** `recall` searches what the agent was told;
@@ -45,6 +52,12 @@ automation and grant it the least access it needs.
   is given and on the `list_namespaces` result. A search with no namespace still
   goes to whatever the API key can see — for a hard boundary, confine the API key
   to a namespace rather than relying on the flag alone.
+
+- The memory-set check behind `forget_session` approval is a pre-flight, not atomic: Ossian's
+  `DELETE /api/memory/sessions/{id}` has no precondition, so a memory written between the final
+  check and the delete is erased unseen. Ossian's list endpoint returns at most 200 memories
+  (newest first), so a larger session is pinned on its 200 newest; a change only to older rows is
+  not detected. Expired memories are invisible to the list but are still erased.
 
 ## Reporting a vulnerability
 

@@ -82,7 +82,8 @@ key's own roles and namespace confinement. It reads its policy from the environm
   touched, and mark slices that may be read but never ingested into.
 - **`OSSIAN_DRY_RUN`** — validate and log writes (ingest / remember / forget) without executing.
 - **`OSSIAN_AUDIT_LOG`** — a JSON audit line per guarded operation, on stderr (default on).
-- **Interactive confirmation** — when the client supports MCP elicitation, `forget_session` prompts the **human** to approve before erasing a session's memory; clients that can't elicit fall back to the `OSSIAN_ALLOW_FORGET` gate.
+- **Interactive confirmation** — when the client supports MCP elicitation, `forget_session` prompts the **human** to approve before erasing a session's memory. The prompt shows the tool, the exact arguments and a fingerprint; the session's set of memories (ids + content) is pinned across the prompt and the erase is refused if it changed; a prompt nobody answers is a refusal. Clients that can't elicit fall back to the `OSSIAN_ALLOW_FORGET` gate.
+- **`OSSIAN_REQUIRE_HUMAN_APPROVAL`** — default `false`. When `true`, `forget_session` is **refused** if the client cannot elicit (instead of falling back to the `OSSIAN_ALLOW_FORGET` gate alone).
 
 The primary control remains the API key: issue the narrowest one that works. See
 [SECURITY.md](SECURITY.md).

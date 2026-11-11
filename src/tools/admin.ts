@@ -25,9 +25,17 @@ export const adminTools: ToolDef[] = [
       const { dryRun } = policy.guard({ tool: "forget_session", capability: "admin", destructive: true });
       const sessionId = args.sessionId as string;
       if (dryRun) return textResult(`[dry-run] Would forget all memories for session '${sessionId}'.`);
-      const ok = await confirm.confirm({ action: "forget session (erase its memories)", target: sessionId });
+      const agentId = (args.agentId as string | undefined) ?? defaultAgentId;
+      const ok = await confirm.confirm({
+        action: "forget session (erase its memories)",
+        target: sessionId,
+        details: { agentId },
+        // Pins the set of memories about to be erased (their ids + content), not a timestamp: Ossian
+        // keeps no revision for a session's memories. See OssianClient.sessionMemoriesVersion.
+        probe: () => client.sessionMemoriesVersion(agentId, sessionId),
+      });
       if (!ok.approved) return textResult(`Cancelled — ${ok.reason}.`);
-      const r = await client.forgetSession((args.agentId as string | undefined) ?? defaultAgentId, sessionId);
+      const r = await client.forgetSession(agentId, sessionId);
       return textResult(`Forgot ${r.forgotten} ${r.forgotten === 1 ? "memory" : "memories"} from that session.`);
     },
   },
