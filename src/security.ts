@@ -36,6 +36,8 @@ export interface SecurityConfig {
   /** Validate + log writes without executing them. */
   dryRun: boolean;
   auditLog: boolean;
+  /** Refuse destructive ops that no human can approve (client cannot elicit) instead of trusting the flags alone. */
+  requireHumanApproval: boolean;
 }
 
 export class PolicyError extends Error {

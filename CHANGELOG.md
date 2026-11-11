@@ -4,6 +4,27 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-11-11
+
+### Security
+- **Approval no longer fails open on timeout.** The human-approval prompt used the MCP SDK's default
+  60 s request timeout, and a timeout fell through to "approved" (the `OSSIAN_ALLOW_FORGET` gate had
+  already passed). A prompt nobody answered therefore auto-approved an irreversible erase. A timeout
+  is now a refusal, and the wait defaults to 5 minutes.
+
+### Added
+- **Approvals are bound to the exact action.** The prompt shows the tool, the full (secret-redacted)
+  arguments and a fingerprint; every approval and refusal is written to the audit log as
+  `"audit":"approval"` with the fingerprint, resource version and `approvedBy` (`human` / `flag-only`).
+- **Approvals are bound to what will be erased.** `forget_session` lists the session's memories through
+  Ossian before the prompt and again after the human answers, and refuses if the set changed. The token
+  is the count plus a SHA-256 over each memory's id and content hash (not `lastUsedAt`/`useCount`, so
+  `recall` does not invalidate an approval). Ossian returns at most 200 memories per list call, and its
+  erase endpoint has no precondition, so the check is a pre-flight (see SECURITY.md).
+- `OSSIAN_REQUIRE_HUMAN_APPROVAL=true` — refuse `forget_session` when the client cannot elicit.
+
+Tracking issue: https://github.com/dockndevai/mcp-core/issues/1
+
 ## [0.2.7] - 2026-11-09
 
 ### Changed

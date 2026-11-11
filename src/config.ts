@@ -51,6 +51,7 @@ export function loadConfig(): AppConfig {
       allowForget: bool("OSSIAN_ALLOW_FORGET", false),
       dryRun: bool("OSSIAN_DRY_RUN", false),
       auditLog: bool("OSSIAN_AUDIT_LOG", true),
+      requireHumanApproval: bool("OSSIAN_REQUIRE_HUMAN_APPROVAL", false),
     },
   };
 }
