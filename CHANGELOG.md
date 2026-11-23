@@ -4,6 +4,12 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1] - 2026-11-23
+
+### Security
+- Bumped transitive `hono`/`@hono/node-server` (via `@modelcontextprotocol/sdk`) past two moderate advisories (GHSA-qv5m-9pm6-hqp3, GHSA-jpvv-r467-5p4w, GHSA-4m76-xfj5-7975, GHSA-h7mg-cq63-vhpq, GHSA-3gg2-335m-rxc6, GHSA-46wx-v44x-9hh2, GHSA-4h7h-rv7c-7m2v) via `npm audit fix`. No direct dependency range changed.
+- Updated `vitest` devDependency to the latest patch within its existing `^5.1.0` range.
+
 ## [0.3.0] - 2026-11-11
 
 ### Security
